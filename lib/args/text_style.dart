@@ -1,3 +1,6 @@
+import 'dart:io';
+import 'dart:typed_data';
+
 import 'package:flutter/widgets.dart'
     show
         TextDecoration,
@@ -20,6 +23,8 @@ import 'package:pdf/widgets.dart' as pw
 import 'color.dart';
 
 extension TextStyleConverter on TextStyle {
+  static String fontBasePath = "";
+
   pw.TextStyle toPdfTextStyle() => pw.TextStyle(
         color: color?.toPdfColor(),
         fontSize: fontSize,
@@ -45,6 +50,22 @@ extension TextStyleConverter on TextStyle {
             : null,
       );
 
+  pw.Font resolveCustomFont(String font) {
+    final file = File('$fontBasePath/$font.ttf');
+
+    if (file.existsSync() == false) {
+      throw Exception('Font file not found: $fontBasePath/$font.ttf');
+    }
+
+    final fontBytes = file.readAsBytesSync();
+    if (fontBytes.isEmpty) {
+      throw Exception('Empty file found at: $fontBasePath/$font.ttf');
+    }
+
+    final fontByteData = ByteData.view(fontBytes.buffer);
+    return pw.Font.ttf(fontByteData);
+  }
+
   pw.Font resolveFont(String font) {
     switch (fontFamily) {
       case 'Courier':
@@ -58,7 +79,7 @@ extension TextStyleConverter on TextStyle {
       case 'Symbol':
         return pw.Font.symbol();
       default:
-        throw Exception('Unsupported Font: $font');
+        return resolveCustomFont(font);
     }
   }
 }
