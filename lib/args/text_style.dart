@@ -25,6 +25,8 @@ import 'color.dart';
 extension TextStyleConverter on TextStyle {
   static String fontBasePath = "";
 
+  setFontBasePath(String basePath) => fontBasePath = basePath;
+
   pw.TextStyle toPdfTextStyle() => pw.TextStyle(
         color: color?.toPdfColor(),
         fontSize: fontSize,
